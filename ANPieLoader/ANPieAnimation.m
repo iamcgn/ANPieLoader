@@ -7,8 +7,11 @@
 //
 
 #import "ANPieAnimation.h"
+#import <QuartzCore/QuartzCore.h>
 
-@interface ANPieAnimation (Private)
+@interface ANPieAnimation ()
+
+@property (nonatomic, retain) CADisplayLink *displayLink;
 
 - (void)timerTick;
 
@@ -20,7 +23,7 @@
 @synthesize callback;
 
 - (id)initWithPie:(ANPieLoader *)aPie start:(float)_start
-			  end:(float)_end duration:(NSTimeInterval)timeInterval {
+              end:(float)_end duration:(NSTimeInterval)timeInterval {
 	if ((self = [super init])) {
 		pie = aPie;
 		animationStart = [[NSDate date] retain];
@@ -49,16 +52,19 @@
 }
 
 - (void)cancelAnimation {
-	[timer invalidate];
-	timer = nil;
+	[_displayLink invalidate];
+  self.displayLink = nil;
 }
 
 - (void)startAnimation {
-	if (!timer) {
-		timer = [NSTimer scheduledTimerWithTimeInterval:(1.0f / 30.0f)
-												 target:self
-											   selector:@selector(timerTick)
-											   userInfo:nil repeats:YES];
+	if (!_displayLink) {
+    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(timerTick)];
+    [self.displayLink setFrameInterval:1];
+    [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+		//timer = [NSTimer scheduledTimerWithTimeInterval:(1.0f / 30.0f)
+		//										 target:self
+		//									   selector:@selector(timerTick)
+		//									   userInfo:nil repeats:YES];
 	}
 }
 
